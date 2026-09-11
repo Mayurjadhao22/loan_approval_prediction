@@ -3,13 +3,11 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-# Set page layout
 st.set_page_config(
     page_title="Loan Approval Predictor", page_icon="🏦", layout="centered"
 )
 
 
-# Load the trained DecisionTreeClassifier pickle file
 @st.cache_resource
 def load_model():
     with open("decision.pkl", "rb") as f:
@@ -58,26 +56,24 @@ with col2:
 st.markdown("---")
 
 if st.button("Predict Approval Status", use_container_width=True):
-    # Construct input DataFrame matching exact feature names expected by the model
-    input_df = pd.DataFrame(
-        [
-            {
-                "no_of_dependents": no_of_dependents,
-                "income_annum": income_annum,
-                "loan_amount": loan_amount,
-                "cibil_score": cibil_score,
-                "residential_assets_value": residential_assets_value,
-                "commercial_assets_value": commercial_assets_value,
-                "luxury_assets_value": luxury_assets_value,
-                "bank_asset_value": bank_asset_value,
-            }
-        ]
-    )
+    # Features in exact positional order expected by the model
+    features_list = [
+        no_of_dependents,
+        income_annum,
+        loan_amount,
+        cibil_score,
+        residential_assets_value,
+        commercial_assets_value,
+        luxury_assets_value,
+        bank_asset_value,
+    ]
 
-    # Predict class and probabilities
+    # Convert to a 2D DataFrame with exact column names stored inside the model
+    input_df = pd.DataFrame([features_list], columns=model.feature_names_in_)
+
+    # Predict approval status
     prediction = model.predict(input_df)[0]
 
-    # Show result
     if str(prediction).strip() == "Approved":
         st.success("🎉 **Status: Loan Approved**")
     else:
